@@ -8,12 +8,21 @@ if (!$block->canUseScriptTag($block->getNameInLayout())) {
 ?>
 
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise" crossorigin></script>
-<script src="https://browser.sentry-cdn.com/4.5.3/bundle.min.js" crossorigin></script>
-<script>Sentry.init({dsn: '<?= $block->escapeUrl(trim($block->getDSN())) ?>'});</script>
+<script src="https://browser.sentry-cdn.com/<?= \JustBetter\Sentry\Block\SentryScript::CURRENT_VERSION;?>/bundle.min.js"
+        crossorigin="anonymous">
+</script>
+<script>
+    Sentry.init({
+        dsn: '<?= $block->escapeUrl(trim($block->getDSN())); ?>',
+        release: '<?= $block->escapeHtml(trim($block->getVersion())); ?>'
+    });
+</script>
 
-<?php if ($block->useLogRocket()) : ?>
+<?php if ($block->useLogRocket()): ?>
     <script src="https://cdn.lr-ingest.io/LogRocket.min.js" crossorigin="anonymous"></script>
-    <script>window.LogRocket && window.LogRocket.init('<?= trim($block->getLogrocketKey()) ?>');</script>
+    <script>
+        window.LogRocket && window.LogRocket.init('<?= /* @noEscape */ trim($block->getLogrocketKey()) ?>');
+    </script>
     <script>
         LogRocket.getSessionURL(sessionURL => {
             Sentry.configureScope(scope => {
@@ -21,7 +30,7 @@ if (!$block->canUseScriptTag($block->getNameInLayout())) {
             });
         });
 
-        <?php if ($block->useLogRocketIdentify()) : ?>
+        <?php if ($block->useLogRocketIdentify()): ?>
 
         define('customerData',
             ['jquery', 'Magento_Customer/js/customer-data'],
